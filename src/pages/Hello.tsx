@@ -1,6 +1,10 @@
 import * as React from "react"
 
-function Hello(props: {name: string}): JSX.Element {
+interface Props {
+  name: string
+}
+
+function Hello(props: Props): JSX.Element {
   return <div className="hello">Hello {props.name}</div>
 }
 
