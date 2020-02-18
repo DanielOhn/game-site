@@ -9,6 +9,7 @@ function App() {
   return (
     <div className="App">
       <Hello name="world" />
+      <Game name="Pong" desc="A simple, classic game of Pong." />
     </div>
   )
 }

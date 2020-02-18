@@ -10,6 +10,7 @@ function Game(props: Props): JSX.Element {
     <div className="game">
       <h2>{props.name}</h2>
       <p>{props.desc}</p>
+      <canvas id="mycanvas"></canvas>
     </div>
   )
 }
