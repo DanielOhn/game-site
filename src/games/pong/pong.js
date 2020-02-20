@@ -2,79 +2,49 @@ import * as React from "react"
 import * as PIXI from "pixi.js"
 
 import bar from "./images/bar.png"
+import wall from "./images/wall.png"
+import ballImg from "./images/ball.png"
 
 function Pong() {
   let pixi_client = null
+
   PIXI.settings.SPRITE_MAX_TEXTURES = Math.min(
     PIXI.settings.SPRITE_MAX_TEXTURES,
     16
   )
-  const app = new PIXI.Application({
-    width: 800,
-    height: 600,
-    transparent: false,
-    forceCanvas: true,
-  })
 
-  function setup() {
-    PIXI.Loader.shared.add("bar", bar).load(initialize)
-  }
-
-  function initialize() {
-    let bar = new PIXI.Sprite(PIXI.Loader.shared.resources["bar"].texture)
-    app.stage.addChild(bar)
-  }
-
-  function updatePixiClient(elm) {
-    pixi_client = elm
-
-    if (pixi_client && pixi_client.children.length <= 0) {
-      pixi_client.appendChild(app.view)
-    }
-
-    setup()
-  }
-  return <div ref={updatePixiClient} />
-}
-
-function dankbois() {
-  const canvas = document.getElementById("mycanvas")
-
-  let type = "WebGL"
-
-  if (!PIXI.utils.isWebGLSupported()) {
-    type = "canvas"
-  }
-
-  // const app = new PIXI.Application();
-  // document.body.appendChild(app.view);
-
-  const app = new PIXI.Application({
-    view: canvas,
-    width: window._width,
-    height: window._height,
-    resolution: window.devicePixelRatio,
-    autoDensity: true,
-  })
-
-  // Below App Function
   let loader = PIXI.Loader.shared
   let player, enemy, ball, playerScore, enemyScore
   let floors = []
   let walls = []
 
-  // Loading in all the images we need for the game
-  loader
-    .add("bar", "images/bar.png")
-    .add("ball", "images/ball.png")
-    .add("wall", "images/wall.png")
-    .load(setup)
-
   let up = keyboard("w")
-  let down = keyboard("s")
+  let down = keyboard("d")
+
+  const app = new PIXI.Application({
+    width: 800,
+    height: 600,
+    transparent: false,
+  })
+
+  const style = new PIXI.TextStyle({
+    fontFamily: "Roboto",
+    fill: ["#ffffff"],
+    fontSize: 32,
+  })
 
   function setup() {
-    // Loading each texture
+    up = keyboard("w")
+    down = keyboard("s")
+
+    loader
+      .add("bar", bar)
+      .add("wall", wall)
+      .add("ball", ballImg)
+      .load(init)
+  }
+
+  function init() {
     let bar_texture = loader.resources.bar.texture
     let ball_texture = loader.resources.ball.texture
     let wall_texture = loader.resources.wall.texture
@@ -85,79 +55,10 @@ function dankbois() {
     stage.x = app.screen.width / 2
     stage.y = app.screen.height / 2
 
-    // Adding Player and Enemy Sprites
-    player = new PIXI.Sprite(bar_texture)
-    stage.addChild(player)
-
-    player.x = -300
-    player.anchor.set(0.5)
-
-    enemy = new PIXI.Sprite(bar_texture)
-    stage.addChild(enemy)
-
-    enemy.x = 300
-    enemy.anchor.set(0.5)
-
-    // Adding the ball
-    ball = new PIXI.Sprite(ball_texture)
-    stage.addChild(ball)
-
-    ball.x = 0
-    ball.anchor.set(0.5)
-
-    // Setting up the walls
-    for (let i = 0; i < 75; i++) {
-      let new_wall = new PIXI.Sprite(wall_texture)
-      let new_floor = new PIXI.Sprite(wall_texture)
-
-      walls.push(new_wall)
-      stage.addChild(walls[i])
-
-      walls[i].y = -200
-      walls[i].x = -300 + i * 8
-
-      walls[i].anchor.set(0.5)
-
-      floors.push(new_floor)
-      stage.addChild(floors[i])
-
-      floors[i].y = 200
-      floors[i].x = -300 + i * 8
-      floors[i].anchor.set(0.5)
-    }
-
-    // Direction of ball and players
-    ball.vx = 1
-    ball.vy = 1
-
-    player.vy = 0
-    enemy.vy = 0
-
-    // Setting Up Score
-
-    // Size, Color, and Font of the text we are adding
-    const style = new PIXI.TextStyle({
-      fontFamily: "Roboto",
-      fill: ["#ffffff"],
-      fontSize: 32,
-    })
-
-    // Adding Score to our Player and Enemy Object
-    player.score = 0
-    enemy.score = 0
-
-    // Creating the actual Text for the scores.
-    playerScore = new PIXI.Text(player.score, style)
-    enemyScore = new PIXI.Text(enemy.score, style)
-
-    stage.addChild(playerScore)
-    stage.addChild(enemyScore)
-
-    playerScore.x = -275
-    playerScore.y = -250
-
-    enemyScore.x = 250
-    enemyScore.y = -250
+    initPlayer(stage, bar_texture)
+    initEnemy(stage, bar_texture)
+    initBall(stage, ball_texture)
+    initWalls(stage, wall_texture)
 
     up.press = () => {
       player.vy = -1
@@ -176,14 +77,6 @@ function dankbois() {
     }
 
     app.ticker.add(delta => game(delta))
-  }
-
-  // Reseting the ball in the center and changes direction
-  function ball_reset() {
-    ball.x = 0
-    ball.y = 0
-    ball.vy = ball.vy * -1
-    ball.vx = ball.vx * -1
   }
 
   function game(delta) {
@@ -258,6 +151,123 @@ function dankbois() {
     enemy.y += enemy.vy * speed
   }
 
+  function initPlayer(stage, texture) {
+    player = new PIXI.Sprite(texture)
+    stage.addChild(player)
+
+    player.x = -300
+    player.anchor.set(0.5)
+
+    player.vy = 0
+    player.score = 0
+
+    playerScore = new PIXI.Text(player.score, style)
+    stage.addChild(playerScore)
+
+    playerScore.x = -300
+    playerScore.y = -250
+  }
+
+  function initEnemy(stage, texture) {
+    enemy = new PIXI.Sprite(texture)
+    stage.addChild(enemy)
+
+    enemy.x = 300
+    enemy.anchor.set(0.5)
+
+    enemy.vy = 0
+    enemy.score = 0
+
+    enemyScore = new PIXI.Text(enemy.score, style)
+    stage.addChild(enemyScore)
+
+    enemyScore.x = 270
+    enemyScore.y = -250
+  }
+
+  function initWalls(stage, texture) {
+    for (let i = 0; i < 75; i++) {
+      let new_wall = new PIXI.Sprite(texture)
+      let new_floor = new PIXI.Sprite(texture)
+
+      walls.push(new_wall)
+      stage.addChild(walls[i])
+
+      walls[i].y = -200
+      walls[i].x = -300 + i * 8
+
+      walls[i].anchor.set(0.5)
+
+      floors.push(new_floor)
+      stage.addChild(floors[i])
+
+      floors[i].y = 200
+      floors[i].x = -300 + i * 8
+      floors[i].anchor.set(0.5)
+    }
+  }
+
+  function initBall(stage, texture) {
+    ball = new PIXI.Sprite(texture)
+    stage.addChild(ball)
+
+    ball.x = 0
+    ball.y = 0
+
+    ball.anchor.set(0.5)
+
+    ball.vx = 1
+    ball.vy = 1
+  }
+  function ball_reset() {
+    ball.x = 0
+    ball.y = 0
+    ball.vy = ball.vy * -1
+    ball.vx = ball.vx * -1
+  }
+
+  function keyboard(value) {
+    let key = {}
+    key.value = value
+    key.isDown = false
+    key.isUp = true
+    key.press = undefined
+    key.release = undefined
+
+    key.downHandler = event => {
+      if (event.key === key.value) {
+        if (key.isUp && key.press) key.press()
+        key.isDown = true
+        key.isUp = false
+        event.preventDefault()
+      }
+    }
+
+    key.upHandler = event => {
+      if (event.key === key.value) {
+        if (key.isDown && key.release) key.release()
+        key.isDown = false
+        key.isUp = true
+        event.preventDefault()
+      }
+    }
+
+    // Attach Event listeners
+    const downListener = key.downHandler.bind(key)
+    const upListener = key.upHandler.bind(key)
+
+    window.addEventListener("keydown", downListener, false)
+    window.addEventListener("keyup", upListener, false)
+
+    // Detach event listeners
+    key.unsubscribe = () => {
+      window.removeEventListener("keydown", downListener)
+      window.removeEventListener("keyup", upListener)
+    }
+
+    return key
+  }
+
   function check_collid(r1, r2) {
     // Define variables we'll use to calculate
     let hit, combinedHalfWidths, combinedHalfHeights, vx, vy
@@ -302,47 +312,16 @@ function dankbois() {
     return hit
   }
 
-  function keyboard(value) {
-    let key = {}
-    key.value = value
-    key.isDown = false
-    key.isUp = true
-    key.press = undefined
-    key.release = undefined
+  function updatePixiClient(elm) {
+    pixi_client = elm
 
-    key.downHandler = event => {
-      if (event.key === key.value) {
-        if (key.isUp && key.press) key.press()
-        key.isDown = true
-        key.isUp = false
-        event.preventDefault()
-      }
+    if (pixi_client && pixi_client.children.length <= 0) {
+      pixi_client.appendChild(app.view)
     }
 
-    key.upHandler = event => {
-      if (event.key === key.value) {
-        if (key.isDown && key.release) key.release()
-        key.isDown = false
-        key.isUp = true
-        event.preventDefault()
-      }
-    }
-
-    // Attach Event listeners
-    const downListener = key.downHandler.bind(key)
-    const upListener = key.upHandler.bind(key)
-
-    window.addEventListener("keydown", downListener, false)
-    window.addEventListener("keyup", upListener, false)
-
-    // Detach event listeners
-    key.unsubscribe = () => {
-      window.removeEventListener("keydown", downListener)
-      window.removeEventListener("keyup", upListener)
-    }
-
-    return key
+    setup()
   }
+  return <div ref={updatePixiClient} />
 }
 
 export default Pong
