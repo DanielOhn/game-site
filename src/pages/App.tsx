@@ -1,14 +1,14 @@
 import * as React from "react"
 import "../styles/App.css"
 
-import Hello from "./Hello"
+import Landing from "./Landing"
 
 import Game from "../components/Game"
 
 function App() {
   return (
     <div className="App">
-      <Hello name="world" />
+      <Landing />
       <Game name="Pong" desc="A simple, classic game of Pong." />
     </div>
   )
