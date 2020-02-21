@@ -25,15 +25,15 @@ h3 {
 
 p,
 li {
-  color: grey;
+  color: darkslategrey;
 }
 
 .body {
   text-align: left;
-  width: 600px;
+  width: 800px;
   margin: auto;
   margin-bottom: 20px;
-  padding: 4px;
+  padding: 8px;
 
   /* border: 1px solid black; */
   border-radius: 2%;
@@ -46,7 +46,9 @@ li {
   justify-content: space-evenly;
   width: 800px;
   margin: auto;
+  margin-bottom: 40px;
 }
+
 .box {
   box-shadow: 2px 2px 2px 2px lightgrey;
   height: 125px;
@@ -58,7 +60,6 @@ li {
   justify-content: space-evenly;
 
   align-items: center;
-  vertical-align: bottom;
 }
 
 .box img {
