@@ -37,6 +37,8 @@ function Pong() {
     up = keyboard("w")
     down = keyboard("s")
 
+    loader.reset()
+
     loader
       .add("bar", bar)
       .add("wall", wall)
