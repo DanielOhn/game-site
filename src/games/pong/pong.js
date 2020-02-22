@@ -34,9 +34,6 @@ function Pong() {
   })
 
   function setup() {
-    up = keyboard("w")
-    down = keyboard("s")
-
     loader.reset()
 
     loader

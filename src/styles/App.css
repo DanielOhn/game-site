@@ -1,3 +1,7 @@
+body {
+  background-color: #fafafa;
+}
+
 .App {
   text-align: center;
 }
@@ -7,6 +11,19 @@
   height: 150px;
   align-content: center;
   margin-bottom: 20px;
+
+  background-color: #b51818;
+  background-image: linear-gradient(
+    141deg,
+    #8c7878 0%,
+    #b31515 51%,
+    #ac1f1f 75%
+  );
+}
+
+.header a {
+  text-decoration: none;
+  color: #ffd9d9;
 }
 
 .content {
@@ -14,30 +31,22 @@
   flex-flow: column nowrap;
 }
 
-h1 {
-  color: black;
-}
-
 h2,
 h3 {
-  color: black;
+  color: #971c1c;
 }
 
 p,
 li {
-  color: darkslategrey;
+  color: #4d3131;
 }
 
 .body {
   text-align: left;
   width: 800px;
   margin: auto;
-  margin-bottom: 20px;
-  padding: 8px;
-
-  /* border: 1px solid black; */
-  border-radius: 2%;
-  box-shadow: 2px 2px 2px 2px lightgrey;
+  margin-bottom: 64px;
+  padding: 16px;
 }
 
 .games {
@@ -50,21 +59,35 @@ li {
 }
 
 .box {
-  box-shadow: 2px 2px 2px 2px lightgrey;
+  border-radius: 8px;
+  box-shadow: 0 13px 27px -5px rgba(50, 50, 93, 0.25),
+    0 8px 16px -8px rgba(0, 0, 0, 0.3), 0 -6px 16px -6px rgba(0, 0, 0, 0.025);
   height: 125px;
   width: 125px;
   padding: 8px;
 
   display: flex;
   flex-flow: column wrap;
-  justify-content: space-evenly;
+  justify-content: space-between;
 
   align-items: center;
+
+  transition: box-shadow 0.15s;
+}
+
+.games a {
+  text-decoration: none;
+  color: #4d3131;
+}
+
+.box:hover {
+  box-shadow: 0 30px 60px -12px rgba(50, 50, 93, 0.25),
+    0 18px 36px -18px rgba(0, 0, 0, 0.3), 0 -12px 36px -8px rgba(0, 0, 0, 0.025);
 }
 
 .box img {
   max-width: 100px;
   height: auto;
 
-  box-shadow: 2px 2px 2px 0px slategray;
+  box-shadow: 2px 4px 8px 4px rgba(50, 50, 93, 0.1);
 }

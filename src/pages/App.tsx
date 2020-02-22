@@ -1,13 +1,15 @@
 import * as React from "react"
 import "../styles/App.css"
 
-import image from "../images/pong.png"
-
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom"
 
 import Landing from "./Landing"
-
 import Game from "../components/Game"
+
+import Pong from "../games/pong/pong"
+import Breakout from "../games/breakout/breakout"
+
+import pong from "../images/pong.png"
 
 function App() {
   return (
@@ -25,23 +27,38 @@ function App() {
               <Route
                 path="/pong"
                 exact
-                render={() => <Game name="Pong" desc="Classic game of Pong." />}
+                render={() => (
+                  <div>
+                    <Game name="Pong" desc="Classic game of Pong." />
+                    <Pong />
+                  </div>
+                )}
+              />
+              <Route
+                path="/breakout"
+                exact
+                render={() => (
+                  <div>
+                    <Game name="Breakout" desc="Classic game of Breakout." />{" "}
+                    <Breakout />
+                  </div>
+                )}
               />
             </Switch>
           </div>
           <div className="games">
-            <div className="box">
-              <img src={image} alt="pong bois"></img>
-              <Link to="/pong">Pong</Link>
-            </div>
-            <div className="box">
+            <Link to="/pong" className="box">
+              <img src={pong} alt="pong bois"></img>
+              <span>Pong</span>
+            </Link>
+            <Link to="/breakout" className="box">
               <img src="http://placekitten.com/g/200/200" alt="cat"></img>
-              <Link to="/">Cat!</Link>
-            </div>
-            <div className="box">
+              <span>Breakout</span>
+            </Link>
+            <Link to="/" className="box">
               <img src="http://placekitten.com/g/200/200" alt="cat"></img>
-              <Link to="/">Cat Again...</Link>
-            </div>
+              <span>Cat Again...</span>
+            </Link>
           </div>
         </div>
       </Router>
