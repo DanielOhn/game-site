@@ -14,13 +14,7 @@ interface MovingObject extends PIXI.Sprite {
   dock?: boolean
   halfWidth?: number
   halfHeight?: number
-}
-
-interface Wall extends PIXI.Graphics {
-  halfWidth?: number
-  halfHeight?: number
-  centerX?: number
-  centerY?: number
+  bounce?: number
 }
 
 function Breakout(): JSX.Element {
@@ -38,10 +32,9 @@ function Breakout(): JSX.Element {
 
   let player: MovingObject
   let ball: MovingObject
-  // let balls: MovingObject[] = []
 
   let bricks: MovingObject[] = []
-  let walls: Wall[] = []
+  let walls: PIXI.Graphics[] = []
 
   let row = 5
   let col = 5
@@ -77,7 +70,7 @@ function Breakout(): JSX.Element {
 
     initPlayer(stage, bar_texture)
     initBall(stage, ball_texture)
-    initWalls(stage, bar_texture)
+    initWalls(stage)
     initBricks(stage, bar_texture)
 
     left.press = () => {
@@ -131,23 +124,25 @@ function Breakout(): JSX.Element {
     stage.addChild(ball)
   }
 
-  function initWalls(stage: PIXI.Container, texture: PIXI.Texture): void {
-    let leftWall: Wall
-    let rightWall: Wall
-    let midWall: Wall
-
-    leftWall = new PIXI.Graphics()
-    rightWall = new PIXI.Graphics()
-    midWall = new PIXI.Graphics()
+  function initWalls(stage: PIXI.Container): void {
+    let leftWall = new PIXI.Graphics()
+    let rightWall = new PIXI.Graphics()
+    let midWall = new PIXI.Graphics()
 
     leftWall.beginFill(0x909090)
-    leftWall.drawRect(-400, -300, 50, 600)
+    leftWall.drawRect(0, 0, 50, 600)
+    leftWall.endFill()
+    leftWall.position.set(-400, -300)
 
     rightWall.beginFill(0x909090)
-    rightWall.drawRect(350, -300, 50, 600)
+    rightWall.drawRect(0, 0, 50, 600)
+    rightWall.endFill()
+    rightWall.position.set(350, -300)
 
     midWall.beginFill(0x909090)
-    midWall.drawRect(-350, -300, 700, 50)
+    midWall.drawRect(0, 0, 700, 50)
+    midWall.endFill()
+    midWall.position.set(-350, -300)
 
     stage.addChild(leftWall)
     stage.addChild(rightWall)
@@ -178,28 +173,14 @@ function Breakout(): JSX.Element {
   }
 
   function game(delta: number): void {
-    let speed = delta * 5
+    let speed = delta * 8
     let ball_speed = delta * 4
 
-    for (let wall of walls) {
-      if (checkCollision(player, wall)) {
-        if (player.vx) {
-          if (player.vx < 1 || player.vx > 1) {
-            player.vx = 0
-          }
-        }
-      }
-
-      if (checkCollision(ball, wall)) {
-        if (ball.vy) ball.vy = ball.vy * -1
-      }
-    }
-
-    // if (checkCollision(ball, player)) {
-    //   if (ball.vy) ball.vy *= -1
-    // }
+    collision()
 
     if (ball.dock === true) {
+      ball.x = player.x
+      ball.y = player.y - 16
       if (player.vx) ball.x += player.vx * speed
     } else if (ball.dock === false) {
       send_ball()
@@ -208,6 +189,7 @@ function Breakout(): JSX.Element {
     if (ball.vx) ball.x += ball_speed * ball.vx
     if (ball.vy) ball.y += ball_speed * ball.vy
     if (player.vx) player.x += speed * player.vx
+    if (player.bounce) player.x += speed * player.bounce
   }
 
   function send_ball(): void {
@@ -216,14 +198,65 @@ function Breakout(): JSX.Element {
     ball.dock = undefined
   }
 
-  function checkCollision(a: MovingObject, b: Wall): boolean {
-    var ab = a.getBounds()
-    var bb = b.getBounds()
+  function collision(): void {
+    let playerX = player.x - player.width / 2
+    let playerY = player.y - player.height / 2
+
+    let ballX = ball.x - ball.width / 2
+    let ballY = ball.y - ball.height / 2
+
+    let playerHit = undefined
+    player.bounce = 0
+
+    for (let wall of walls) {
+      if (
+        playerX < wall.x + wall.width &&
+        playerX + player.width > wall.x &&
+        playerY < wall.y + wall.height &&
+        playerY + player.height > wall.y
+      ) {
+        if (player.vx && player.vx < 0) {
+          playerHit = "left"
+        }
+
+        if (player.vx && player.vx > 0) {
+          playerHit = "right"
+        }
+      }
+
+      if (
+        ballX < wall.x + wall.width &&
+        ballX + ball.width > wall.x &&
+        ballY < wall.y + wall.height &&
+        ballY + ball.height > wall.y
+      ) {
+        if (ball.vx) ball.vx = -ball.vx
+      }
+    }
+
+    if (playerHit === "left") {
+      player.vx = 0
+      player.bounce = 1
+    }
+
+    if (playerHit === "right") {
+      player.vx = 0
+      player.bounce = -1
+    }
+  }
+
+  function checkCollision(a: PIXI.Sprite, b: PIXI.Sprite) {
+    let aX = a.x - a.width / 2
+    let aY = a.y - a.height / 2
+
+    let bX = b.x - b.width / 2
+    let bY = b.y - b.height / 2
+
     return (
-      ab.x + ab.width > bb.x &&
-      ab.x < bb.x + bb.width &&
-      ab.y + ab.height > bb.y &&
-      ab.y < bb.y + bb.height
+      aX < bX + b.width &&
+      aX + a.width > bX &&
+      aY < bY + b.height &&
+      aY + a.height > bY
     )
   }
 
