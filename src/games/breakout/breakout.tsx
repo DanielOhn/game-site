@@ -12,6 +12,15 @@ interface MovingObject extends PIXI.Sprite {
   lives?: number
   score?: number
   dock?: boolean
+  halfWidth?: number
+  halfHeight?: number
+}
+
+interface Wall extends PIXI.Graphics {
+  halfWidth?: number
+  halfHeight?: number
+  centerX?: number
+  centerY?: number
 }
 
 function Breakout(): JSX.Element {
@@ -32,7 +41,7 @@ function Breakout(): JSX.Element {
   // let balls: MovingObject[] = []
 
   let bricks: MovingObject[] = []
-  let walls: PIXI.Graphics[] = []
+  let walls: Wall[] = []
 
   let row = 5
   let col = 5
@@ -123,9 +132,13 @@ function Breakout(): JSX.Element {
   }
 
   function initWalls(stage: PIXI.Container, texture: PIXI.Texture): void {
-    let leftWall = new PIXI.Graphics()
-    let rightWall = new PIXI.Graphics()
-    let midWall = new PIXI.Graphics()
+    let leftWall: Wall
+    let rightWall: Wall
+    let midWall: Wall
+
+    leftWall = new PIXI.Graphics()
+    rightWall = new PIXI.Graphics()
+    midWall = new PIXI.Graphics()
 
     leftWall.beginFill(0x909090)
     leftWall.drawRect(-400, -300, 50, 600)
@@ -140,7 +153,9 @@ function Breakout(): JSX.Element {
     stage.addChild(rightWall)
     stage.addChild(midWall)
 
-    // walls.push(graphics)
+    walls.push(leftWall)
+    walls.push(rightWall)
+    walls.push(midWall)
   }
 
   function initBricks(stage: PIXI.Container, texture: PIXI.Texture): void {
@@ -195,35 +210,20 @@ function Breakout(): JSX.Element {
     if (player.vx) player.x += speed * player.vx
   }
 
-  interface Point {
-    x: number
-    y: number
-  }
-
   function send_ball(): void {
     ball.vx = player.vx
     ball.vy = -1
     ball.dock = undefined
   }
 
-  function checkCollision(a: PIXI.Sprite, b: PIXI.Graphics): boolean {
-    let yA = a.y - a.height / 2
-    let xA = a.x - a.width / 2
-
-    let finalX_A = xA
-    let finalY_A = yA
-
-    let yB = b.y - b.height / 2
-    let xB = b.x - b.width / 2
-
-    let finalX_B = xB
-    let finalY_B = yB
-
+  function checkCollision(a: MovingObject, b: Wall): boolean {
+    var ab = a.getBounds()
+    var bb = b.getBounds()
     return (
-      finalX_A + a.width > finalX_B &&
-      finalX_A < finalX_B + b.width &&
-      finalY_A + a.height > finalY_B &&
-      finalY_A < finalY_B + b.height
+      ab.x + ab.width > bb.x &&
+      ab.x < bb.x + bb.width &&
+      ab.y + ab.height > bb.y &&
+      ab.y < bb.y + bb.height
     )
   }
 
