@@ -264,7 +264,7 @@ function Breakout(): JSX.Element {
     //   player.bounce = -1
     // }
 
-    checkCollision(left_wall, player)
+    checkCollisionUpdate(left_wall, player)
   }
 
   // Graphics start at the top left corner
@@ -275,7 +275,55 @@ function Breakout(): JSX.Element {
     y: number
   }
 
-  let checkCollision = (a: PIXI.Graphics, b: PIXI.Sprite) => {
+  // let checkCollision = (a: PIXI.Graphics, b: PIXI.Sprite) => {
+  //   let aX0 = a.x
+  //   let aY0 = a.y
+
+  //   let aX1 = a.x + a.width
+  //   let aY1 = a.y + a.height
+
+  //   let aTopLeft: Vector = { x: aX0, y: aY0 } // dot14
+  //   let aTopRight: Vector = { x: aX1, y: aY0 } // dot11
+  //   let aBotLeft: Vector = { x: aX0, y: aY1 } // dot13
+  //   let aBotRight: Vector = { x: aX1, y: aY1 } // dot12
+
+  //   let aCenter: Vector = { x: a.x + a.width / 2, y: a.y + a.height / 2 } // dot10
+
+  //   let bCenter: Vector = { x: b.x, y: b.y } // dot20
+
+  //   let bX0 = b.x - b.width / 2
+  //   let bY0 = b.y + b.height / 2
+
+  //   let bX1 = b.x + b.width / 2
+  //   let bY1 = b.y - b.height / 2
+
+  //   let bTopLeft: Vector = { x: bX0, y: bY1 } // dot24
+  //   let bTopRight: Vector = { x: bX1, y: bY1 } // dot21
+  //   let bBotLeft: Vector = { x: bX0, y: bY0 } // dot23
+  //   let bBotRight: Vector = { x: bX1, y: bY0 } //dot22
+
+  //   let axis = { x: 300, y: 400 }
+
+  //   let C = { x: bCenter.x - aCenter.x, y: bCenter.y - aCenter.y }
+  //   let A = { x: aTopRight.x - aCenter.x, y: aTopRight.y - aCenter.y }
+  //   let B = { x: bTopLeft.x - bCenter.x, y: bTopLeft.y - bCenter.y }
+
+  //   let projC = dotProduct(C, axis)
+  //   let projA = dotProduct(A, axis)
+  //   let projB = dotProduct(B, axis)
+
+  //   var gap: number = projC - projA + projB
+
+  //   if (gap > 0) {
+  //     text = "Gap between boxes.  Gap is " + gap
+  //   } else if (gap === 0) {
+  //     text = "Boxes are touching.  Gap is " + gap
+  //   } else {
+  //     text = "Penetration had occured. Gap is " + gap
+  //   }
+  // }
+
+  function checkCollisionUpdate(a: PIXI.Graphics, b: PIXI.Sprite) {
     let aX0 = a.x
     let aY0 = a.y
 
@@ -302,31 +350,75 @@ function Breakout(): JSX.Element {
     let bBotLeft: Vector = { x: bX0, y: bY0 } // dot23
     let bBotRight: Vector = { x: bX1, y: bY0 } //dot22
 
-    let axis = { x: 300, y: 400 }
+    // Get Points/Dots
+    // 1) Center
+    // 2) Top Right
+    // 3) Bottom Right
+    // 4) Bottom Left
+    // 5) Top Left
 
-    let C = { x: bCenter.x - aCenter.x, y: bCenter.y - aCenter.y }
-    let A = { x: aTopRight.x - aCenter.x, y: aTopRight.y - aCenter.y }
-    let B = { x: bTopLeft.x - bCenter.x, y: bTopLeft.y - bCenter.y }
+    let axis: Vector = { x: 300, y: 400 }
 
-    let projC = dotProduct(C, axis)
-    let projA = dotProduct(A, axis)
-    let projB = dotProduct(B, axis)
+    let vecBoxA: Vector[] = [
+      { x: aCenter.x, y: aCenter.y },
+      { x: aTopRight.x, y: aTopRight.y },
+      { x: aBotRight.x, y: aBotRight.y },
+      { x: aBotLeft.x, y: aBotLeft.y },
+      { x: aTopLeft.x, y: aTopLeft.y },
+    ]
 
-    var gap: number = projC - projA + projB
+    let vecBoxB: Vector[] = [
+      { x: bCenter.x, y: bCenter.y },
+      { x: bTopRight.x, y: bTopRight.y },
+      { x: bBotRight.x, y: bBotRight.y },
+      { x: bBotLeft.x, y: bBotLeft.y },
+      { x: bTopLeft.x, y: bTopLeft.y },
+    ]
 
-    if (gap > 0) {
-      text = "Gap between boxes.  Gap is " + gap
-    } else if (gap === 0) {
-      text = "Boxes are touching.  Gap is " + gap
-    } else {
-      text = "Penetration had occured. Gap is " + gap
+    let min_BoxA: number = dotProduct(vecBoxA[1], axis)
+    let min_dot_BoxA: number = 1
+
+    let max_BoxA: number = dotProduct(vecBoxA[1], axis)
+    let max_dot_BoxA: number = 1
+
+    let min_BoxB: number = dotProduct(vecBoxB[1], axis)
+    let max_BoxB: number = dotProduct(vecBoxB[1], axis)
+
+    let min_dot_BoxB: number = 1
+    let max_dot_BoxB: number = 1
+
+    for (let i: number = 0; i < vecBoxA.length; i++) {
+      let currProj: number = dotProduct(vecBoxA[i], axis)
+
+      if (min_BoxA > currProj) {
+        min_BoxA = currProj
+        min_dot_BoxA = i
+      }
+
+      if (currProj > max_BoxA) {
+        max_BoxA = currProj
+        max_dot_BoxA = i
+      }
     }
 
-    //---------- UPDATE --------------//
-  }
+    for (let i: number = 0; i < vecBoxB.length; i++) {
+      let currProj: number = dotProduct(vecBoxB[i], axis)
 
-  function checkCollisionUpdate() {
-    let axis: Vector = { x: 1, y: -1 }
+      if (min_BoxB > currProj) {
+        min_BoxB = currProj
+        min_dot_BoxB = i
+      }
+
+      if (currProj > max_BoxB) {
+        max_BoxB = currProj
+        max_dot_BoxB = i
+      }
+    }
+
+    let isSeperated: Boolean = max_BoxB < min_BoxA || max_BoxA < min_BoxB
+
+    if (isSeperated) text = "There's a gap!"
+    else text = "no gappers"
   }
 
   function dotProduct(C: Vector, axis: Vector): number {
