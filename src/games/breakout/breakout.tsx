@@ -33,8 +33,12 @@ function Breakout(): JSX.Element {
   let player: MovingObject
   let ball: MovingObject
 
+  let test_text: PIXI.Text
+  let text: string = "TExt Goes here"
+
   let bricks: MovingObject[] = []
   let walls: PIXI.Graphics[] = []
+  let left_wall: PIXI.Graphics
 
   let row = 5
   let col = 5
@@ -72,6 +76,18 @@ function Breakout(): JSX.Element {
     initBall(stage, ball_texture)
     initWalls(stage)
     initBricks(stage, bar_texture)
+
+    const style = new PIXI.TextStyle({
+      fontFamily: "Roboto",
+      fill: ["#ffffff"],
+      fontSize: 24,
+    })
+
+    test_text = new PIXI.Text(text, style)
+    stage.addChild(test_text)
+
+    test_text.x = -300
+    test_text.y = 100
 
     left.press = () => {
       player.vx = -1
@@ -151,6 +167,8 @@ function Breakout(): JSX.Element {
     walls.push(leftWall)
     walls.push(rightWall)
     walls.push(midWall)
+
+    left_wall = leftWall
   }
 
   function initBricks(stage: PIXI.Container, texture: PIXI.Texture): void {
@@ -173,10 +191,12 @@ function Breakout(): JSX.Element {
   }
 
   function game(delta: number): void {
-    let speed = delta * 8
+    let speed = delta * 4
     let ball_speed = delta * 4
 
     collision()
+
+    test_text.text = text
 
     if (ball.dock === true) {
       ball.x = player.x
@@ -199,65 +219,118 @@ function Breakout(): JSX.Element {
   }
 
   function collision(): void {
-    let playerX = player.x - player.width / 2
-    let playerY = player.y - player.height / 2
+    // let playerX = player.x - player.width / 2
+    // let playerY = player.y - player.height / 2
 
-    let ballX = ball.x - ball.width / 2
-    let ballY = ball.y - ball.height / 2
+    // let ballX = ball.x - ball.width / 2
+    // let ballY = ball.y - ball.height / 2
 
-    let playerHit = undefined
-    player.bounce = 0
+    // let playerHit = undefined
+    // player.bounce = 0
 
-    for (let wall of walls) {
-      if (
-        playerX < wall.x + wall.width &&
-        playerX + player.width > wall.x &&
-        playerY < wall.y + wall.height &&
-        playerY + player.height > wall.y
-      ) {
-        if (player.vx && player.vx < 0) {
-          playerHit = "left"
-        }
+    // for (let wall of walls) {
+    //   if (
+    //     playerX < wall.x + wall.width &&
+    //     playerX + player.width > wall.x &&
+    //     playerY < wall.y + wall.height &&
+    //     playerY + player.height > wall.y
+    //   ) {
+    //     if (player.vx && player.vx < 0) {
+    //       playerHit = "left"
+    //     }
 
-        if (player.vx && player.vx > 0) {
-          playerHit = "right"
-        }
-      }
+    //     if (player.vx && player.vx > 0) {
+    //       playerHit = "right"
+    //     }
+    //   }
 
-      if (
-        ballX < wall.x + wall.width &&
-        ballX + ball.width > wall.x &&
-        ballY < wall.y + wall.height &&
-        ballY + ball.height > wall.y
-      ) {
-        if (ball.vx) ball.vx = -ball.vx
-      }
-    }
+    //   if (
+    //     ballX < wall.x + wall.width &&
+    //     ballX + ball.width > wall.x &&
+    //     ballY < wall.y + wall.height &&
+    //     ballY + ball.height > wall.y
+    //   ) {
+    //     if (ball.vx) ball.vx = -ball.vx
+    //   }
+    // }
 
-    if (playerHit === "left") {
-      player.vx = 0
-      player.bounce = 1
-    }
+    // if (playerHit === "left") {
+    //   player.vx = 0
+    //   player.bounce = 1
+    // }
 
-    if (playerHit === "right") {
-      player.vx = 0
-      player.bounce = -1
-    }
+    // if (playerHit === "right") {
+    //   player.vx = 0
+    //   player.bounce = -1
+    // }
+
+    checkCollision(left_wall, player)
   }
 
-  function checkCollision(a: PIXI.Sprite, b: PIXI.Sprite) {
-    let aX = a.x - a.width / 2
-    let aY = a.y - a.height / 2
+  // Graphics start at the top left corner
+  // Other objects are anchored set to the center
 
-    let bX = b.x - b.width / 2
-    let bY = b.y - b.height / 2
+  interface Vector {
+    x: number
+    y: number
+  }
 
-    return (
-      aX < bX + b.width &&
-      aX + a.width > bX &&
-      aY < bY + b.height &&
-      aY + a.height > bY
-    )
+  let checkCollision = (a: PIXI.Graphics, b: PIXI.Sprite) => {
+    let aX0 = a.x
+    let aY0 = a.y
+
+    let aX1 = a.x + a.width
+    let aY1 = a.y + a.height
+
+    let aTopLeft: Vector = { x: aX0, y: aY0 } // dot14
+    let aTopRight: Vector = { x: aX1, y: aY0 } // dot11
+    let aBotLeft: Vector = { x: aX0, y: aY1 } // dot13
+    let aBotRight: Vector = { x: aX1, y: aY1 } // dot12
+
+    let aCenter: Vector = { x: a.x + a.width / 2, y: a.y + a.height / 2 } // dot10
+
+    let bCenter: Vector = { x: b.x, y: b.y } // dot20
+
+    let bX0 = b.x - b.width / 2
+    let bY0 = b.y + b.height / 2
+
+    let bX1 = b.x + b.width / 2
+    let bY1 = b.y - b.height / 2
+
+    let bTopLeft: Vector = { x: bX0, y: bY1 } // dot24
+    let bTopRight: Vector = { x: bX1, y: bY1 } // dot21
+    let bBotLeft: Vector = { x: bX0, y: bY0 } // dot23
+    let bBotRight: Vector = { x: bX1, y: bY0 } //dot22
+
+    let axis = { x: 300, y: 400 }
+
+    let C = { x: bCenter.x - aCenter.x, y: bCenter.y - aCenter.y }
+    let A = { x: aTopRight.x - aCenter.x, y: aTopRight.y - aCenter.y }
+    let B = { x: bTopLeft.x - bCenter.x, y: bTopLeft.y - bCenter.y }
+
+    let projC = dotProduct(C, axis)
+    let projA = dotProduct(A, axis)
+    let projB = dotProduct(B, axis)
+
+    var gap: number = projC - projA + projB
+
+    if (gap > 0) {
+      text = "Gap between boxes.  Gap is " + gap
+    } else if (gap === 0) {
+      text = "Boxes are touching.  Gap is " + gap
+    } else {
+      text = "Penetration had occured. Gap is " + gap
+    }
+
+    //---------- UPDATE --------------//
+  }
+
+  function checkCollisionUpdate() {
+    let axis: Vector = { x: 1, y: -1 }
+  }
+
+  function dotProduct(C: Vector, axis: Vector): number {
+    return Math.floor(C.x * axis.x + C.y + axis.y)
   }
 
   function keyboard(value: string): any {
