@@ -5,16 +5,33 @@ import bar from "./images/side_bar.png"
 import ballImg from "./images/ball.png"
 // import Game from "../../components/Game" (Futuer, Make Library for all 2D Math Code, collision, keyboard, reusable stuff)
 
-interface MovingObject extends PIXI.Sprite {
+interface Vector {
+  x: number
+  y: number
+}
+
+interface SpriteVector extends PIXI.Sprite {
   vx?: number
   vy?: number
   hp?: number
   lives?: number
   score?: number
   dock?: boolean
-  halfWidth?: number
-  halfHeight?: number
   bounce?: number
+
+  topLeft?: Vector
+  topRight?: Vector
+  botLeft?: Vector
+  botRight?: Vector
+  center?: Vector
+}
+
+interface GraphicsVector extends PIXI.Graphics {
+  topLeft?: Vector
+  topRight?: Vector
+  botLeft?: Vector
+  botRight?: Vector
+  center?: Vector
 }
 
 function Breakout(): JSX.Element {
@@ -30,15 +47,15 @@ function Breakout(): JSX.Element {
 
   let stage: PIXI.Container
 
-  let player: MovingObject
-  let ball: MovingObject
+  let player: SpriteVector
+  let ball: SpriteVector
 
   let test_text: PIXI.Text
   let text: string = "TExt Goes here"
 
-  let bricks: MovingObject[] = []
-  let walls: PIXI.Graphics[] = []
-  let left_wall: PIXI.Graphics
+  let bricks: SpriteVector[] = []
+  let walls: GraphicsVector[] = []
+  let left_wall: GraphicsVector
 
   let row = 5
   let col = 5
@@ -120,6 +137,8 @@ function Breakout(): JSX.Element {
     player.anchor.set(0.5)
 
     player.vx = 0
+
+    setVectorPoints(player)
   }
 
   function initBall(stage: PIXI.Container, texture: PIXI.Texture): void {
@@ -141,9 +160,13 @@ function Breakout(): JSX.Element {
   }
 
   function initWalls(stage: PIXI.Container): void {
-    let leftWall = new PIXI.Graphics()
-    let rightWall = new PIXI.Graphics()
-    let midWall = new PIXI.Graphics()
+    let leftWall: GraphicsVector
+    let rightWall: GraphicsVector
+    let midWall: GraphicsVector
+
+    leftWall = new PIXI.Graphics()
+    rightWall = new PIXI.Graphics()
+    midWall = new PIXI.Graphics()
 
     leftWall.beginFill(0x909090)
     leftWall.drawRect(0, 0, 50, 600)
@@ -168,13 +191,17 @@ function Breakout(): JSX.Element {
     walls.push(rightWall)
     walls.push(midWall)
 
+    setGraphicPoints(leftWall)
+    setGraphicPoints(rightWall)
+    setGraphicPoints(midWall)
+
     left_wall = leftWall
   }
 
   function initBricks(stage: PIXI.Container, texture: PIXI.Texture): void {
     for (let i = 0; i < row; i++) {
       for (let j = 0; j < col; j++) {
-        let brick: MovingObject
+        let brick: SpriteVector
         brick = new sprite(texture)
 
         stage.addChild(brick)
@@ -191,7 +218,7 @@ function Breakout(): JSX.Element {
   }
 
   function game(delta: number): void {
-    let speed = delta * 4
+    let speed = delta * 5
     let ball_speed = delta * 4
 
     collision()
@@ -264,92 +291,40 @@ function Breakout(): JSX.Element {
     //   player.bounce = -1
     // }
 
-    checkCollisionUpdate(left_wall, player)
+    checkCollisionWalls(left_wall, player)
   }
 
-  // Graphics start at the top left corner
-  // Other objects are anchored set to the center
+  function setGraphicPoints(obj: GraphicsVector) {
+    let x0 = obj.x
+    let x1 = obj.x + obj.width
 
-  interface Vector {
-    x: number
-    y: number
+    let y0 = obj.y
+    let y1 = obj.y + obj.height
+
+    obj.center = { x: x0 + obj.width / 2, y: y0 + obj.height / 2 } // dot 10
+    obj.topLeft = { x: x0, y: y0 } // dot 14
+    obj.topRight = { x: x1, y: y0 } // dot 11
+    obj.botLeft = { x: x0, y: y1 } // dot 13
+    obj.botRight = { x: x1, y: y1 } // dot 12
   }
 
-  // let checkCollision = (a: PIXI.Graphics, b: PIXI.Sprite) => {
-  //   let aX0 = a.x
-  //   let aY0 = a.y
+  function setVectorPoints(obj: SpriteVector) {
+    //  THIS ONLY APPLIES IF ANCHOR IS SET TO .5
+    // sprite.anchor.set(0.5)
+    let x0 = obj.x - obj.width / 2
+    let x1 = obj.x + obj.width / 2
 
-  //   let aX1 = a.x + a.width
-  //   let aY1 = a.y + a.height
+    let y0 = obj.y + obj.height / 2
+    let y1 = obj.y - obj.height / 2
 
-  //   let aTopLeft: Vector = { x: aX0, y: aY0 } // dot14
-  //   let aTopRight: Vector = { x: aX1, y: aY0 } // dot11
-  //   let aBotLeft: Vector = { x: aX0, y: aY1 } // dot13
-  //   let aBotRight: Vector = { x: aX1, y: aY1 } // dot12
+    obj.center = { x: obj.x, y: obj.y }
+    obj.topLeft = { x: x0, y: y1 }
+    obj.topRight = { x: x1, y: y1 }
+    obj.botLeft = { x: x0, y: y0 }
+    obj.botRight = { x: x1, y: y0 }
+  }
 
-  //   let aCenter: Vector = { x: a.x + a.width / 2, y: a.y + a.height / 2 } // dot10
-
-  //   let bCenter: Vector = { x: b.x, y: b.y } // dot20
-
-  //   let bX0 = b.x - b.width / 2
-  //   let bY0 = b.y + b.height / 2
-
-  //   let bX1 = b.x + b.width / 2
-  //   let bY1 = b.y - b.height / 2
-
-  //   let bTopLeft: Vector = { x: bX0, y: bY1 } // dot24
-  //   let bTopRight: Vector = { x: bX1, y: bY1 } // dot21
-  //   let bBotLeft: Vector = { x: bX0, y: bY0 } // dot23
-  //   let bBotRight: Vector = { x: bX1, y: bY0 } //dot22
-
-  //   let axis = { x: 300, y: 400 }
-
-  //   let C = { x: bCenter.x - aCenter.x, y: bCenter.y - aCenter.y }
-  //   let A = { x: aTopRight.x - aCenter.x, y: aTopRight.y - aCenter.y }
-  //   let B = { x: bTopLeft.x - bCenter.x, y: bTopLeft.y - bCenter.y }
-
-  //   let projC = dotProduct(C, axis)
-  //   let projA = dotProduct(A, axis)
-  //   let projB = dotProduct(B, axis)
-
-  //   var gap: number = projC - projA + projB
-
-  //   if (gap > 0) {
-  //     text = "Gap between boxes.  Gap is " + gap
-  //   } else if (gap === 0) {
-  //     text = "Boxes are touching.  Gap is " + gap
-  //   } else {
-  //     text = "Penetration had occured. Gap is " + gap
-  //   }
-  // }
-
-  function checkCollisionUpdate(a: PIXI.Graphics, b: PIXI.Sprite) {
-    let aX0 = a.x
-    let aY0 = a.y
-
-    let aX1 = a.x + a.width
-    let aY1 = a.y + a.height
-
-    let aTopLeft: Vector = { x: aX0, y: aY0 } // dot14
-    let aTopRight: Vector = { x: aX1, y: aY0 } // dot11
-    let aBotLeft: Vector = { x: aX0, y: aY1 } // dot13
-    let aBotRight: Vector = { x: aX1, y: aY1 } // dot12
-
-    let aCenter: Vector = { x: a.x + a.width / 2, y: a.y + a.height / 2 } // dot10
-
-    let bCenter: Vector = { x: b.x, y: b.y } // dot20
-
-    let bX0 = b.x - b.width / 2
-    let bY0 = b.y + b.height / 2
-
-    let bX1 = b.x + b.width / 2
-    let bY1 = b.y - b.height / 2
-
-    let bTopLeft: Vector = { x: bX0, y: bY1 } // dot24
-    let bTopRight: Vector = { x: bX1, y: bY1 } // dot21
-    let bBotLeft: Vector = { x: bX0, y: bY0 } // dot23
-    let bBotRight: Vector = { x: bX1, y: bY0 } //dot22
-
+  function checkCollisionWalls(a: GraphicsVector, b: SpriteVector) {
     // Get Points/Dots
     // 1) Center
     // 2) Top Right
@@ -357,68 +332,86 @@ function Breakout(): JSX.Element {
     // 4) Bottom Left
     // 5) Top Left
 
-    let axis: Vector = { x: 300, y: 400 }
+    let botAxis: Vector = { x: 0, y: stage.height / 2 }
+    let topAxis: Vector = { x: 0, y: -stage.height / 2 }
+    let leftAxis: Vector = { x: -stage.width / 2, y: 0 }
+    let rightAxis: Vector = { x: stage.width / 2, y: 0 }
 
-    let vecBoxA: Vector[] = [
-      { x: aCenter.x, y: aCenter.y },
-      { x: aTopRight.x, y: aTopRight.y },
-      { x: aBotRight.x, y: aBotRight.y },
-      { x: aBotLeft.x, y: aBotLeft.y },
-      { x: aTopLeft.x, y: aTopLeft.y },
-    ]
+    let vecBoxA: Vector[] | undefined
+    let vecBoxB: Vector[] | undefined
 
-    let vecBoxB: Vector[] = [
-      { x: bCenter.x, y: bCenter.y },
-      { x: bTopRight.x, y: bTopRight.y },
-      { x: bBotRight.x, y: bBotRight.y },
-      { x: bBotLeft.x, y: bBotLeft.y },
-      { x: bTopLeft.x, y: bTopLeft.y },
-    ]
-
-    let min_BoxA: number = dotProduct(vecBoxA[1], axis)
-    let min_dot_BoxA: number = 1
-
-    let max_BoxA: number = dotProduct(vecBoxA[1], axis)
-    let max_dot_BoxA: number = 1
-
-    let min_BoxB: number = dotProduct(vecBoxB[1], axis)
-    let max_BoxB: number = dotProduct(vecBoxB[1], axis)
-
-    let min_dot_BoxB: number = 1
-    let max_dot_BoxB: number = 1
-
-    for (let i: number = 0; i < vecBoxA.length; i++) {
-      let currProj: number = dotProduct(vecBoxA[i], axis)
-
-      if (min_BoxA > currProj) {
-        min_BoxA = currProj
-        min_dot_BoxA = i
-      }
-
-      if (currProj > max_BoxA) {
-        max_BoxA = currProj
-        max_dot_BoxA = i
-      }
+    if (a.center && a.topRight && a.topLeft && a.botRight && a.botLeft) {
+      vecBoxA = [
+        { x: a.center.x, y: a.center.y },
+        { x: a.topRight.x, y: a.topRight.y },
+        { x: a.botRight.x, y: a.botRight.y },
+        { x: a.botLeft.x, y: a.botLeft.y },
+        { x: a.topLeft.x, y: a.topLeft.y },
+      ]
+    } else {
+      text = "Set your graphics vector up boi!"
     }
 
-    for (let i: number = 0; i < vecBoxB.length; i++) {
-      let currProj: number = dotProduct(vecBoxB[i], axis)
-
-      if (min_BoxB > currProj) {
-        min_BoxB = currProj
-        min_dot_BoxB = i
-      }
-
-      if (currProj > max_BoxB) {
-        max_BoxB = currProj
-        max_dot_BoxB = i
-      }
+    if (b.center && b.topRight && b.topLeft && b.botRight && b.botLeft) {
+      vecBoxB = [
+        { x: b.center.x, y: b.center.y },
+        { x: b.topRight.x, y: b.topRight.y },
+        { x: b.botRight.x, y: b.botRight.y },
+        { x: b.botLeft.x, y: b.botLeft.y },
+        { x: b.topLeft.x, y: b.topLeft.y },
+      ]
+    } else {
+      text = "Yo this mofo didn't set up the SPRITE VECTORS!"
     }
 
-    let isSeperated: Boolean = max_BoxB < min_BoxA || max_BoxA < min_BoxB
+    if (vecBoxA && vecBoxB) {
+      let min_BoxA: number = dotProduct(vecBoxA[1], leftAxis)
+      let min_dot_BoxA: number = 1
 
-    if (isSeperated) text = "There's a gap!"
-    else text = "no gappers"
+      let max_BoxA: number = dotProduct(vecBoxA[1], leftAxis)
+      let max_dot_BoxA: number = 1
+
+      let min_BoxB: number = dotProduct(vecBoxB[1], leftAxis)
+      let max_BoxB: number = dotProduct(vecBoxB[1], leftAxis)
+
+      let min_dot_BoxB: number = 1
+      let max_dot_BoxB: number = 1
+
+      for (let i: number = 0; i < vecBoxA.length; i++) {
+        let currProj: number = dotProduct(vecBoxA[i], leftAxis)
+
+        if (min_BoxA > currProj) {
+          min_BoxA = currProj
+          min_dot_BoxA = i
+        }
+
+        if (currProj > max_BoxA) {
+          max_BoxA = currProj
+          max_dot_BoxA = i
+        }
+      }
+
+      for (let i: number = 0; i < vecBoxB.length; i++) {
+        let currProj: number = dotProduct(vecBoxB[i], leftAxis)
+
+        if (min_BoxB > currProj) {
+          min_BoxB = currProj
+          min_dot_BoxB = i
+        }
+
+        if (currProj > max_BoxB) {
+          max_BoxB = currProj
+          max_dot_BoxB = i
+        }
+      }
+
+      let isSeperated: Boolean = max_BoxB < min_BoxA || max_BoxA < min_BoxB
+
+      if (isSeperated) text = "There's a gap!"
+      else text = "right"
+    } else {
+      text = "Boxes not set"
+    }
   }
 
   function dotProduct(C: Vector, axis: Vector): number {
