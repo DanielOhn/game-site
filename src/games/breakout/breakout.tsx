@@ -309,7 +309,7 @@ function Breakout(): JSX.Element {
   }
 
   function setVectorPoints(obj: SpriteVector) {
-    //  THIS ONLY APPLIES IF ANCHOR IS SET TO .5
+    //  THIS ONLY APPLIES IF anchor IS SET TO .5
     // sprite.anchor.set(0.5)
     let x0 = obj.x - obj.width / 2
     let x1 = obj.x + obj.width / 2
@@ -324,6 +324,13 @@ function Breakout(): JSX.Element {
     obj.botRight = { x: x1, y: y0 }
   }
 
+  interface ProjResult {
+    minProj: number
+    maxProj: number
+    minIndex: number
+    maxIndex: number
+  }
+
   function checkCollisionWalls(a: GraphicsVector, b: SpriteVector) {
     // Get Points/Dots
     // 1) Center
@@ -332,10 +339,18 @@ function Breakout(): JSX.Element {
     // 4) Bottom Left
     // 5) Top Left
 
+    setVectorPoints(b)
+
     let botAxis: Vector = { x: 0, y: stage.height / 2 }
     let topAxis: Vector = { x: 0, y: -stage.height / 2 }
-    let leftAxis: Vector = { x: -stage.width / 2, y: 0 }
+    let leftAxis: Vector = { x: stage.width / 2, y: 0 }
     let rightAxis: Vector = { x: stage.width / 2, y: 0 }
+
+    let axis: Vector[] = []
+    axis.push(botAxis)
+    axis.push(topAxis)
+    axis.push(leftAxis)
+    axis.push(rightAxis)
 
     let vecBoxA: Vector[] | undefined
     let vecBoxB: Vector[] | undefined
@@ -365,57 +380,83 @@ function Breakout(): JSX.Element {
     }
 
     if (vecBoxA && vecBoxB) {
-      let min_BoxA: number = dotProduct(vecBoxA[1], leftAxis)
-      let min_dot_BoxA: number = 1
+      // get normals (boxes won't rotate) so leave this for now
 
-      let max_BoxA: number = dotProduct(vecBoxA[1], leftAxis)
-      let max_dot_BoxA: number = 1
+      // Result of P, Q
+      let resultP1: ProjResult = getMinMax(vecBoxA, leftAxis)
+      let resultP2: ProjResult = getMinMax(vecBoxB, leftAxis)
 
-      let min_BoxB: number = dotProduct(vecBoxB[1], leftAxis)
-      let max_BoxB: number = dotProduct(vecBoxB[1], leftAxis)
+      let resultQ1: ProjResult = getMinMax(vecBoxA, botAxis)
+      let resultQ2: ProjResult = getMinMax(vecBoxB, botAxis)
 
-      let min_dot_BoxB: number = 1
-      let max_dot_BoxB: number = 1
+      // Result of R, S
+      let resultR1: ProjResult = getMinMax(vecBoxA, rightAxis)
+      let resultR2: ProjResult = getMinMax(vecBoxB, rightAxis)
 
-      for (let i: number = 0; i < vecBoxA.length; i++) {
-        let currProj: number = dotProduct(vecBoxA[i], leftAxis)
+      let resultS1: ProjResult = getMinMax(vecBoxA, topAxis)
+      let resultS2: ProjResult = getMinMax(vecBoxB, topAxis)
 
-        if (min_BoxA > currProj) {
-          min_BoxA = currProj
-          min_dot_BoxA = i
-        }
+      let seperateP: boolean =
+        resultP1.maxProj < resultP2.minProj ||
+        resultP2.maxProj < resultP2.minProj
+      let seperateQ: boolean =
+        resultQ1.maxProj < resultQ2.minProj ||
+        resultQ2.maxProj < resultQ2.minProj
+      let seperateR: boolean =
+        resultR1.maxProj < resultR2.minProj ||
+        resultR2.maxProj < resultR2.minProj
+      let seperateS: boolean =
+        resultS1.maxProj < resultS2.minProj ||
+        resultS2.maxProj < resultS2.minProj
 
-        if (currProj > max_BoxA) {
-          max_BoxA = currProj
-          max_dot_BoxA = i
-        }
+      let isSeperated: boolean = false
+      isSeperated = seperateP || seperateQ || seperateR || seperateS
+
+      if (isSeperated) {
+        text = "Seperated boxes"
+      } else {
+        text = "When worlds collid"
+      }
+    }
+  }
+
+  function getMinMax(vecBox: Vector[], axis: Vector): ProjResult {
+    let minBox: number = dotProduct(vecBox[1], axis)
+    let maxBox: number = dotProduct(vecBox[1], axis)
+
+    let minDot: number = 1
+    let maxDot: number = 1
+
+    for (let i = 0; i < vecBox.length; i++) {
+      let currProj: number = dotProduct(vecBox[i], axis)
+
+      if (minBox > currProj) {
+        minBox = currProj
+        minDot = i
       }
 
-      for (let i: number = 0; i < vecBoxB.length; i++) {
-        let currProj: number = dotProduct(vecBoxB[i], leftAxis)
-
-        if (min_BoxB > currProj) {
-          min_BoxB = currProj
-          min_dot_BoxB = i
-        }
-
-        if (currProj > max_BoxB) {
-          max_BoxB = currProj
-          max_dot_BoxB = i
-        }
+      if (currProj > maxBox) {
+        maxBox = currProj
+        maxDot = i
       }
+    }
 
-      let isSeperated: Boolean = max_BoxB < min_BoxA || max_BoxA < min_BoxB
-
-      if (isSeperated) text = "There's a gap!"
-      else text = "right"
-    } else {
-      text = "Boxes not set"
+    return {
+      minProj: minBox,
+      maxProj: maxBox,
+      minIndex: minDot,
+      maxIndex: maxDot,
     }
   }
 
   function dotProduct(C: Vector, axis: Vector): number {
     return Math.floor(C.x * axis.x + C.y + axis.y)
+  }
+
+  function normVector(v: Vector): Vector {
+    let div = Math.sqrt(v.x * v.x + v.y * v.y)
+
+    return { x: v.x / div, y: v.y / div }
   }
 
   function keyboard(value: string): any {
