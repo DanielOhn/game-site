@@ -2,6 +2,9 @@
 
 import { Vector, GraphicsVector, SpriteVector, ProjResult } from "./Interfaces"
 
+// Initialiez Points
+
+// Graphics anchor point is at the upper left hand corner
 export let setGraphicPoints = (obj: GraphicsVector) => {
   let x0 = obj.x
   let x1 = obj.x + obj.width
@@ -16,6 +19,8 @@ export let setGraphicPoints = (obj: GraphicsVector) => {
   obj.botRight = { x: x1, y: y1 } // dot 12
 }
 
+// Getting Points for Sprites
+// They start at upper left hand corner too, but I set anchor to .5 for these bad bois
 export let setVectorPoints = (obj: SpriteVector) => {
   //  THIS ONLY APPLIES IF anchor IS SET TO .5
   // sprite.anchor.set(0.5)
@@ -32,7 +37,8 @@ export let setVectorPoints = (obj: SpriteVector) => {
   obj.botRight = { x: x1, y: y0 }
 }
 
-let normVector = (v: Vector): Vector => {
+// Vector MATH
+export let normVector = (v: Vector): Vector => {
   let div = Math.sqrt(v.x * v.x + v.y * v.y)
 
   return { x: v.x / div, y: v.y / div }

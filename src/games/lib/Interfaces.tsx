@@ -27,6 +27,8 @@ export interface GraphicsVector extends PIXI.Graphics {
   botLeft?: Vector
   botRight?: Vector
   center?: Vector
+
+  dragging?: boolean
 }
 
 export interface ProjResult {

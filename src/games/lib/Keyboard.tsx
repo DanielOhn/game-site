@@ -1,5 +1,3 @@
-import * as React from "react"
-
 let keyboard = (value: string): any => {
   let key = {
     value: value,

@@ -8,6 +8,7 @@ import Game from "../components/Game"
 
 import Pong from "../games/pong/pong"
 import Breakout from "../games/breakout/breakout"
+import TestGame from "../games/testGame/testGame"
 
 import pong from "../images/pong.png"
 
@@ -39,8 +40,21 @@ function App() {
                 exact
                 render={() => (
                   <div>
-                    <Game name="Breakout" desc="Classic game of Breakout." />{" "}
+                    <Game name="Breakout" desc="Classic game of Breakout." />
                     <Breakout />
+                  </div>
+                )}
+              />
+              <Route
+                path="/test"
+                exact
+                render={() => (
+                  <div>
+                    <Game
+                      name="Collision Test"
+                      desc="Nothing helps make up minds like roses or a lot of time"
+                    />
+                    <TestGame />
                   </div>
                 )}
               />
@@ -55,7 +69,7 @@ function App() {
               <img src="http://placekitten.com/g/200/200" alt="cat"></img>
               <span>Breakout</span>
             </Link>
-            <Link to="/" className="box">
+            <Link to="/test" className="box">
               <img src="http://placekitten.com/g/200/200" alt="cat"></img>
               <span>Cat Again...</span>
             </Link>
