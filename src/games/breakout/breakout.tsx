@@ -5,34 +5,11 @@ import bar from "./images/side_bar.png"
 import ballImg from "./images/ball.png"
 // import Game from "../../components/Game" (Futuer, Make Library for all 2D Math Code, collision, keyboard, reusable stuff)
 
-interface Vector {
-  x: number
-  y: number
-}
+import { SpriteVector, GraphicsVector } from "../lib/Interfaces"
 
-interface SpriteVector extends PIXI.Sprite {
-  vx?: number
-  vy?: number
-  hp?: number
-  lives?: number
-  score?: number
-  dock?: boolean
-  bounce?: number
-
-  topLeft?: Vector
-  topRight?: Vector
-  botLeft?: Vector
-  botRight?: Vector
-  center?: Vector
-}
-
-interface GraphicsVector extends PIXI.Graphics {
-  topLeft?: Vector
-  topRight?: Vector
-  botLeft?: Vector
-  botRight?: Vector
-  center?: Vector
-}
+import keyboard from "../lib/Keyboard"
+import { setGraphicPoints, setVectorPoints } from "../lib/Vector"
+import checkCollisionWalls from "../lib/Collision"
 
 function Breakout(): JSX.Element {
   let pixi_client = null
@@ -51,11 +28,11 @@ function Breakout(): JSX.Element {
   let ball: SpriteVector
 
   let test_text: PIXI.Text
-  let text: string = "TExt Goes here"
+  let text: string = "Text Goes here"
 
   let bricks: SpriteVector[] = []
   let walls: GraphicsVector[] = []
-  let left_wall: GraphicsVector
+  // let left_wall: GraphicsVector
 
   let row = 5
   let col = 5
@@ -195,7 +172,7 @@ function Breakout(): JSX.Element {
     setGraphicPoints(rightWall)
     setGraphicPoints(midWall)
 
-    left_wall = leftWall
+    // left_wall = rightWall
   }
 
   function initBricks(stage: PIXI.Container, texture: PIXI.Texture): void {
@@ -235,6 +212,7 @@ function Breakout(): JSX.Element {
 
     if (ball.vx) ball.x += ball_speed * ball.vx
     if (ball.vy) ball.y += ball_speed * ball.vy
+    if (ball.bounce) ball.y += ball_speed * ball.bounce
     if (player.vx) player.x += speed * player.vx
     if (player.bounce) player.x += speed * player.bounce
   }
@@ -253,7 +231,8 @@ function Breakout(): JSX.Element {
     // let ballY = ball.y - ball.height / 2
 
     // let playerHit = undefined
-    // player.bounce = 0
+    player.bounce = 0
+    ball.bounce = 0
 
     // for (let wall of walls) {
     //   if (
@@ -291,213 +270,34 @@ function Breakout(): JSX.Element {
     //   player.bounce = -1
     // }
 
-    checkCollisionWalls(left_wall, player)
-  }
-
-  function setGraphicPoints(obj: GraphicsVector) {
-    let x0 = obj.x
-    let x1 = obj.x + obj.width
-
-    let y0 = obj.y
-    let y1 = obj.y + obj.height
-
-    obj.center = { x: x0 + obj.width / 2, y: y0 + obj.height / 2 } // dot 10
-    obj.topLeft = { x: x0, y: y0 } // dot 14
-    obj.topRight = { x: x1, y: y0 } // dot 11
-    obj.botLeft = { x: x0, y: y1 } // dot 13
-    obj.botRight = { x: x1, y: y1 } // dot 12
-  }
-
-  function setVectorPoints(obj: SpriteVector) {
-    //  THIS ONLY APPLIES IF anchor IS SET TO .5
-    // sprite.anchor.set(0.5)
-    let x0 = obj.x - obj.width / 2
-    let x1 = obj.x + obj.width / 2
-
-    let y0 = obj.y + obj.height / 2
-    let y1 = obj.y - obj.height / 2
-
-    obj.center = { x: obj.x, y: obj.y }
-    obj.topLeft = { x: x0, y: y1 }
-    obj.topRight = { x: x1, y: y1 }
-    obj.botLeft = { x: x0, y: y0 }
-    obj.botRight = { x: x1, y: y0 }
-  }
-
-  interface ProjResult {
-    minProj: number
-    maxProj: number
-    minIndex: number
-    maxIndex: number
-  }
-
-  function checkCollisionWalls(a: GraphicsVector, b: SpriteVector) {
-    // Get Points/Dots
-    // 1) Center
-    // 2) Top Right
-    // 3) Bottom Right
-    // 4) Bottom Left
-    // 5) Top Left
-
-    setVectorPoints(b)
-
-    let botAxis: Vector = { x: 0, y: stage.height / 2 }
-    let topAxis: Vector = { x: 0, y: -stage.height / 2 }
-    let leftAxis: Vector = { x: stage.width / 2, y: 0 }
-    let rightAxis: Vector = { x: stage.width / 2, y: 0 }
-
-    let axis: Vector[] = []
-    axis.push(botAxis)
-    axis.push(topAxis)
-    axis.push(leftAxis)
-    axis.push(rightAxis)
-
-    let vecBoxA: Vector[] | undefined
-    let vecBoxB: Vector[] | undefined
-
-    if (a.center && a.topRight && a.topLeft && a.botRight && a.botLeft) {
-      vecBoxA = [
-        { x: a.center.x, y: a.center.y },
-        { x: a.topRight.x, y: a.topRight.y },
-        { x: a.botRight.x, y: a.botRight.y },
-        { x: a.botLeft.x, y: a.botLeft.y },
-        { x: a.topLeft.x, y: a.topLeft.y },
-      ]
-    } else {
-      text = "Set your graphics vector up boi!"
-    }
-
-    if (b.center && b.topRight && b.topLeft && b.botRight && b.botLeft) {
-      vecBoxB = [
-        { x: b.center.x, y: b.center.y },
-        { x: b.topRight.x, y: b.topRight.y },
-        { x: b.botRight.x, y: b.botRight.y },
-        { x: b.botLeft.x, y: b.botLeft.y },
-        { x: b.topLeft.x, y: b.topLeft.y },
-      ]
-    } else {
-      text = "Yo this mofo didn't set up the SPRITE VECTORS!"
-    }
-
-    if (vecBoxA && vecBoxB) {
-      // get normals (boxes won't rotate) so leave this for now
-
-      // Result of P, Q
-      let resultP1: ProjResult = getMinMax(vecBoxA, leftAxis)
-      let resultP2: ProjResult = getMinMax(vecBoxB, leftAxis)
-
-      let resultQ1: ProjResult = getMinMax(vecBoxA, botAxis)
-      let resultQ2: ProjResult = getMinMax(vecBoxB, botAxis)
-
-      // Result of R, S
-      let resultR1: ProjResult = getMinMax(vecBoxA, rightAxis)
-      let resultR2: ProjResult = getMinMax(vecBoxB, rightAxis)
-
-      let resultS1: ProjResult = getMinMax(vecBoxA, topAxis)
-      let resultS2: ProjResult = getMinMax(vecBoxB, topAxis)
-
-      let seperateP: boolean =
-        resultP1.maxProj < resultP2.minProj ||
-        resultP2.maxProj < resultP2.minProj
-      let seperateQ: boolean =
-        resultQ1.maxProj < resultQ2.minProj ||
-        resultQ2.maxProj < resultQ2.minProj
-      let seperateR: boolean =
-        resultR1.maxProj < resultR2.minProj ||
-        resultR2.maxProj < resultR2.minProj
-      let seperateS: boolean =
-        resultS1.maxProj < resultS2.minProj ||
-        resultS2.maxProj < resultS2.minProj
-
-      let isSeperated: boolean = false
-      isSeperated = seperateP || seperateQ || seperateR || seperateS
-
-      if (isSeperated) {
-        text = "Seperated boxes"
-      } else {
-        text = "When worlds collid"
-      }
-    }
-  }
-
-  function getMinMax(vecBox: Vector[], axis: Vector): ProjResult {
-    let minBox: number = dotProduct(vecBox[1], axis)
-    let maxBox: number = dotProduct(vecBox[1], axis)
-
-    let minDot: number = 1
-    let maxDot: number = 1
-
-    for (let i = 0; i < vecBox.length; i++) {
-      let currProj: number = dotProduct(vecBox[i], axis)
-
-      if (minBox > currProj) {
-        minBox = currProj
-        minDot = i
-      }
-
-      if (currProj > maxBox) {
-        maxBox = currProj
-        maxDot = i
-      }
-    }
-
-    return {
-      minProj: minBox,
-      maxProj: maxBox,
-      minIndex: minDot,
-      maxIndex: maxDot,
-    }
-  }
-
-  function dotProduct(C: Vector, axis: Vector): number {
-    return Math.floor(C.x * axis.x + C.y + axis.y)
-  }
-
-  function normVector(v: Vector): Vector {
-    let div = Math.sqrt(v.x * v.x + v.y * v.y)
-
-    return { x: v.x / div, y: v.y / div }
-  }
-
-  function keyboard(value: string): any {
-    let key = {
-      value: value,
-      isDown: false,
-      isUp: true,
-      press: () => {},
-      release: () => {},
-
-      downHandler: (event: any) => {
-        if (event.key === key.value) {
-          if (key.isUp && key.press) key.press()
-          key.isDown = true
-          key.isUp = false
-          event.preventDefault()
+    for (let wall of walls) {
+      if (!checkCollisionWalls(wall, player, stage, text)) {
+        if (player.vx && player.vx < 0) {
+          player.vx = 0
+          player.bounce = 2
+        } else if (player.vx && player.vx > 0) {
+          player.vx = 0
+          player.bounce = -2
         }
-      },
+      }
 
-      upHandler: (event: any) => {
-        if (event.key === key.value) {
-          if (key.isDown && key.release) key.release()
-          key.isDown = false
-          key.isUp = true
-          event.preventDefault()
+      if (!checkCollisionWalls(wall, ball, stage, text)) {
+        if (ball.vx && ball.vx > 0) {
+          ball.vx = 0
+          // ball.vx = -1
         }
-      },
 
-      unsubscribe: () => {
-        window.removeEventListener("keydown", downListener)
-        window.removeEventListener("keyup", upListener)
-      },
+        if (ball.vx && ball.vx < 0) {
+          ball.vx = 0
+          // ball.vx = 1
+        }
+
+        if (ball.vy && ball.y > 220) {
+          ball.vy = 0
+          // ball.vy = 1
+        }
+      }
     }
-    // Attach Event listeners
-    const downListener = key.downHandler.bind(key)
-    const upListener = key.upHandler.bind(key)
-
-    window.addEventListener("keydown", downListener, false)
-    window.addEventListener("keyup", upListener, false)
-
-    return key
   }
 
   function updatePixiClient(elm: any): void {
