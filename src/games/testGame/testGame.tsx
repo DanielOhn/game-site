@@ -17,6 +17,7 @@ function TestGame(): JSX.Element {
 
   let rectOne: GraphicsVector = new PIXI.Graphics()
   let rectTwo: GraphicsVector = new PIXI.Graphics()
+  let rectThree: GraphicsVector = new PIXI.Graphics()
 
   const app = new PIXI.Application({
     width: 800,
@@ -38,7 +39,12 @@ function TestGame(): JSX.Element {
     stage.y = app.screen.height / 2
 
     initRectangle(rectOne, 0, 0)
-    initRectangle(rectTwo, 100, 100)
+    initRectangle(rectTwo, 50, 50)
+    initRectangle(rectThree, -50, -50)
+
+    rectOne.name = "box one"
+    rectTwo.name = "box two"
+    rectThree.name = "box three"
   }
 
   function initRectangle(rect: GraphicsVector, x: number, y: number) {
@@ -51,8 +57,9 @@ function TestGame(): JSX.Element {
 
     rect.position.set(x, y)
 
-    rect.hitArea = new PIXI.Rectangle(x, y, 50, 50)
-    setGraphicPoints(rect)
+    rect.hitArea = new PIXI.Rectangle(0, 0, 50, 50)
+
+    stage.addChild(rect)
 
     rect
       .on("pointerdown", function dragStart(this: any) {
@@ -68,14 +75,12 @@ function TestGame(): JSX.Element {
         this.dragging = false
       })
       .on("pointermove", function dragMove(this: any, e: any) {
-        if (this.dragging && this.center) {
+        if (this.dragging) {
           let newPos = e.data.getLocalPosition(stage)
-          this.x = newPos.x - this.center.x
-          this.y = newPos.y - this.center.y
+          this.x = newPos.x - this.width / 2
+          this.y = newPos.y - this.height / 2
         }
       })
-
-    stage.addChild(rect)
   }
 
   function updatePIXIClient(elm: any) {
