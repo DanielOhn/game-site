@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Graphics } from "pixi.js"
 
 export interface Vector {
   x: number
@@ -19,6 +20,8 @@ export interface SpriteVector extends PIXI.Sprite {
   botLeft?: Vector
   botRight?: Vector
   center?: Vector
+
+  type?: string
 }
 
 export interface GraphicsVector extends PIXI.Graphics {
@@ -28,7 +31,7 @@ export interface GraphicsVector extends PIXI.Graphics {
   botRight?: Vector
   center?: Vector
 
-  dragging?: boolean
+  type?: string
 }
 
 export interface ProjResult {

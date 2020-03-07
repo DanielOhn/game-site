@@ -17,9 +17,6 @@ let checkCollision = (
   setPoints(a)
   setPoints(b)
 
-  // setVectorPoints(a)
-  // setVectorPoints(b)
-
   let botAxis: Vector = { x: 0, y: stage.height / 2 }
   let topAxis: Vector = { x: 0, y: -stage.height / 2 }
   let leftAxis: Vector = { x: stage.width / 2, y: 0 }
@@ -88,30 +85,6 @@ let checkCollision = (
     isSeperated = seperateP || seperateQ || seperateR || seperateS
 
     return isSeperated
-    // else {
-    // if (
-    //   a.topRight &&
-    //   a.topLeft &&
-    //   b.topRight &&
-    //   b.topLeft &&
-    //   b.botLeft &&
-    //   a.botLeft &&
-    //   a.botRight &&
-    //   b.botRight
-    // ) {
-    //   if (a.topRight.x > b.topLeft.x && a.botRight.x > b.botLeft.x)
-    //     console.log("left")
-    //   else if (a.topLeft.x < b.topRight.x && a.botLeft.x < b.botRight.x)
-    //     console.log("right")
-
-    // if (a.botRight.y < b.botLeft.y) console.log('bottom')
-    //   }
-    // }
-    // if (isSeperated) {
-    //   text = "Seperated boxes"
-    // } else {
-    //   text = "When worlds collid"
-    // }
   }
 }
 

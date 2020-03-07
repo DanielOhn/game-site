@@ -39,19 +39,19 @@ import { Vector, GraphicsVector, SpriteVector, ProjResult } from "./Interfaces"
 
 export let setPoints = (obj: SpriteVector | GraphicsVector) => {
   let x0, x1, y0, y1
-  if (obj as SpriteVector) {
+  if (obj.type === "sprite") {
     x0 = obj.x - obj.width / 2
     x1 = obj.x + obj.width / 2
 
-    y0 = obj.y + obj.height / 2
-    y1 = obj.y - obj.height / 2
+    y0 = obj.y - obj.height / 2
+    y1 = obj.y + obj.height / 2
 
     obj.center = { x: obj.x, y: obj.y }
-    obj.topLeft = { x: x0, y: y1 }
-    obj.topRight = { x: x1, y: y1 }
-    obj.botLeft = { x: x0, y: y0 }
-    obj.botRight = { x: x1, y: y0 }
-  } else if (obj as GraphicsVector) {
+    obj.topLeft = { x: x0, y: y0 }
+    obj.topRight = { x: x1, y: y0 }
+    obj.botLeft = { x: x0, y: y1 }
+    obj.botRight = { x: x1, y: y1 }
+  } else {
     x0 = obj.x
     x1 = obj.x + obj.width
 
