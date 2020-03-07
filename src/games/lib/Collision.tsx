@@ -1,12 +1,11 @@
 // import * as React from "react"
 import { Vector, GraphicsVector, SpriteVector, ProjResult } from "./Interfaces"
-import { setVectorPoints, getMinMax } from "./Vector"
+import { getMinMax, setPoints } from "./Vector"
 
-let checkCollisionWalls = (
-  a: GraphicsVector,
-  b: SpriteVector,
-  stage: PIXI.Container,
-  text: string
+let checkCollision = (
+  a: SpriteVector | GraphicsVector,
+  b: SpriteVector | GraphicsVector,
+  stage: PIXI.Container
 ) => {
   // Get Points/Dots
   // 1) Center
@@ -15,7 +14,11 @@ let checkCollisionWalls = (
   // 4) Bottom Left
   // 5) Top Left
 
-  setVectorPoints(b)
+  setPoints(a)
+  setPoints(b)
+
+  // setVectorPoints(a)
+  // setVectorPoints(b)
 
   let botAxis: Vector = { x: 0, y: stage.height / 2 }
   let topAxis: Vector = { x: 0, y: -stage.height / 2 }
@@ -40,7 +43,7 @@ let checkCollisionWalls = (
       { x: a.topLeft.x, y: a.topLeft.y },
     ]
   } else {
-    text = "Set your graphics vector up boi!"
+    console.log("Set your graphics vector up boi!")
   }
 
   if (b.center && b.topRight && b.topLeft && b.botRight && b.botLeft) {
@@ -52,7 +55,7 @@ let checkCollisionWalls = (
       { x: b.topLeft.x, y: b.topLeft.y },
     ]
   } else {
-    text = "Yo this mofo didn't set up the SPRITE VECTORS!"
+    console.log("Yo this mofo didn't set up the SPRITE VECTORS!")
   }
 
   if (vecBoxA && vecBoxB) {
@@ -112,4 +115,4 @@ let checkCollisionWalls = (
   }
 }
 
-export default checkCollisionWalls
+export default checkCollision

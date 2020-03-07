@@ -8,8 +8,8 @@ import ballImg from "./images/ball.png"
 import { SpriteVector, GraphicsVector } from "../lib/Interfaces"
 
 import keyboard from "../lib/Keyboard"
-import { setGraphicPoints, setVectorPoints } from "../lib/Vector"
-import checkCollisionWalls from "../lib/Collision"
+import { setPoints } from "../lib/Vector"
+import checkCollision from "../lib/Collision"
 
 function Breakout(): JSX.Element {
   let pixi_client = null
@@ -115,7 +115,7 @@ function Breakout(): JSX.Element {
 
     player.vx = 0
 
-    setVectorPoints(player)
+    setPoints(player)
   }
 
   function initBall(stage: PIXI.Container, texture: PIXI.Texture): void {
@@ -168,9 +168,9 @@ function Breakout(): JSX.Element {
     walls.push(rightWall)
     walls.push(midWall)
 
-    setGraphicPoints(leftWall)
-    setGraphicPoints(rightWall)
-    setGraphicPoints(midWall)
+    setPoints(leftWall)
+    setPoints(rightWall)
+    setPoints(midWall)
 
     // left_wall = rightWall
   }
@@ -271,7 +271,7 @@ function Breakout(): JSX.Element {
     // }
 
     for (let wall of walls) {
-      if (!checkCollisionWalls(wall, player, stage, text)) {
+      if (!checkCollision(wall, player, stage)) {
         if (player.vx && player.vx < 0) {
           player.vx = 0
           player.bounce = 2
@@ -281,7 +281,7 @@ function Breakout(): JSX.Element {
         }
       }
 
-      if (!checkCollisionWalls(wall, ball, stage, text)) {
+      if (!checkCollision(wall, ball, stage)) {
         if (ball.vx && ball.vx > 0) {
           ball.vx = 0
           // ball.vx = -1

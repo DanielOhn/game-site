@@ -1,7 +1,8 @@
 import * as React from "react"
 import * as PIXI from "pixi.js"
 import { GraphicsVector } from "../lib/Interfaces"
-import { setGraphicPoints } from "../lib/Vector"
+// import { setPoints } from "../lib/Vector"
+import checkCollision from "../lib/Collision"
 
 function TestGame(): JSX.Element {
   let pixi_client = null
@@ -45,6 +46,8 @@ function TestGame(): JSX.Element {
     rectOne.name = "box one"
     rectTwo.name = "box two"
     rectThree.name = "box three"
+
+    app.ticker.add(delta => gameLoop(delta))
   }
 
   function initRectangle(rect: GraphicsVector, x: number, y: number) {
@@ -81,6 +84,20 @@ function TestGame(): JSX.Element {
           this.y = newPos.y - this.height / 2
         }
       })
+  }
+
+  function gameLoop(delta: number) {
+    collision()
+  }
+
+  function collision() {
+    if (!checkCollision(rectOne, rectTwo, stage)) {
+      rectOne.tint = 0xff0000
+      rectTwo.tint = 0xff0000
+    } else {
+      rectTwo.tint = 0xffffff
+      rectOne.tint = 0xffffff
+    }
   }
 
   function updatePIXIClient(elm: any) {
