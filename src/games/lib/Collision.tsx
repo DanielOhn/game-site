@@ -1,6 +1,6 @@
 // import * as React from "react"
 import { Vector, GraphicsVector, SpriteVector, ProjResult } from "./Interfaces"
-import { getMinMax, setPoints } from "./Vector"
+import { getMinMax, setCenter } from "./Vector"
 
 let checkCollision = (
   a: SpriteVector | GraphicsVector,
@@ -14,8 +14,8 @@ let checkCollision = (
   // 4) Bottom Left
   // 5) Top Left
 
-  setPoints(a)
-  setPoints(b)
+  setCenter(a)
+  setCenter(b)
 
   let botAxis: Vector = { x: 0, y: stage.height / 2 }
   let topAxis: Vector = { x: 0, y: -stage.height / 2 }
@@ -31,25 +31,31 @@ let checkCollision = (
   let vecBoxA: Vector[] | undefined
   let vecBoxB: Vector[] | undefined
 
-  if (a.center && a.topRight && a.topLeft && a.botRight && a.botLeft) {
+  // botLeft = minX maxY
+  // botRight = maxX maxY
+
+  // topLeft = minX minY
+  // topRight = maxX minY
+
+  if (a.center) {
     vecBoxA = [
-      { x: a.center.x, y: a.center.y },
-      { x: a.topRight.x, y: a.topRight.y },
-      { x: a.botRight.x, y: a.botRight.y },
-      { x: a.botLeft.x, y: a.botLeft.y },
-      { x: a.topLeft.x, y: a.topLeft.y },
+      { x: a.center.x, y: a.center.y }, //dot 10
+      { x: a.getBounds().right, y: a.getBounds().top }, //dot 11
+      { x: a.getBounds().right, y: a.getBounds().bottom }, // dot 12
+      { x: a.getBounds().left, y: a.getBounds().bottom }, // dot 13
+      { x: a.getBounds().left, y: a.getBounds().top }, // dot 14
     ]
   } else {
     console.log("Set your graphics vector up boi!")
   }
 
-  if (b.center && b.topRight && b.topLeft && b.botRight && b.botLeft) {
+  if (b.center) {
     vecBoxB = [
       { x: b.center.x, y: b.center.y },
-      { x: b.topRight.x, y: b.topRight.y },
-      { x: b.botRight.x, y: b.botRight.y },
-      { x: b.botLeft.x, y: b.botLeft.y },
-      { x: b.topLeft.x, y: b.topLeft.y },
+      { x: b.getBounds().right, y: b.getBounds().top },
+      { x: b.getBounds().right, y: b.getBounds().bottom },
+      { x: b.getBounds().left, y: b.getBounds().bottom },
+      { x: b.getBounds().left, y: b.getBounds().top },
     ]
   } else {
     console.log("Yo this mofo didn't set up the SPRITE VECTORS!")

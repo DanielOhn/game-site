@@ -8,7 +8,6 @@ import ballImg from "./images/ball.png"
 import { SpriteVector, GraphicsVector } from "../lib/Interfaces"
 
 import keyboard from "../lib/Keyboard"
-import { setPoints } from "../lib/Vector"
 import checkCollision from "../lib/Collision"
 
 function Breakout(): JSX.Element {
@@ -114,8 +113,6 @@ function Breakout(): JSX.Element {
     player.anchor.set(0.5)
 
     player.vx = 0
-
-    setPoints(player)
   }
 
   function initBall(stage: PIXI.Container, texture: PIXI.Texture): void {
@@ -167,10 +164,6 @@ function Breakout(): JSX.Element {
     walls.push(leftWall)
     walls.push(rightWall)
     walls.push(midWall)
-
-    setPoints(leftWall)
-    setPoints(rightWall)
-    setPoints(midWall)
 
     // left_wall = rightWall
   }

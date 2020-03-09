@@ -15,23 +15,11 @@ export interface SpriteVector extends PIXI.Sprite {
   dock?: boolean
   bounce?: number
 
-  topLeft?: Vector
-  topRight?: Vector
-  botLeft?: Vector
-  botRight?: Vector
   center?: Vector
-
-  type?: string
 }
 
 export interface GraphicsVector extends PIXI.Graphics {
-  topLeft?: Vector
-  topRight?: Vector
-  botLeft?: Vector
-  botRight?: Vector
   center?: Vector
-
-  type?: string
 }
 
 export interface ProjResult {

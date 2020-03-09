@@ -44,22 +44,25 @@ function TestGame(): JSX.Element {
     stage = new PIXI.Container()
     app.stage.addChild(stage)
 
-    stage.x = app.screen.width / 2
-    stage.y = app.screen.height / 2
-
     rectOne.name = "box one"
     rectTwo.name = "box two"
     rectThree.name = "box three"
     spriteOne.name = "sprite one"
 
-    initRectangle(rectOne, 0, 0)
-    initRectangle(rectTwo, 175, -75)
-    initRectangle(rectThree, -75, -75)
+    initRectangle(rectOne, 400, 250)
+    initRectangle(rectTwo, 500, 300)
+    initRectangle(rectThree, 575, 200)
 
-    initSprite(spriteOne, -100, 100)
+    spriteOne = initSprite(spriteOne, 500, 500)
 
     initText()
+    console.log(spriteOne.getBounds())
+    console.log(spriteOne.getBounds().top)
+    console.log(spriteOne.getBounds().bottom)
 
+    console.log(spriteOne.getBounds().left)
+    console.log(spriteOne.getBounds().right)
+    console.log(rectOne.getLocalBounds())
     app.ticker.add(delta => gameLoop(delta))
   }
 
@@ -67,8 +70,6 @@ function TestGame(): JSX.Element {
     rect.lineStyle(4, 0xffffff)
     rect.drawRect(0, 0, 50, 50)
     rect.endFill()
-
-    rect.type = "graphic"
 
     rect.interactive = true
     rect.buttonMode = true
@@ -90,8 +91,17 @@ function TestGame(): JSX.Element {
           this.x +
           "\ny: " +
           this.y +
-          "\ntype: " +
-          this.type
+          "\nisSprite: " +
+          this.isSprite +
+          "\n\nGet Bounds" +
+          "\nleft: " +
+          this.getBounds().left +
+          "\nright: " +
+          this.getBounds().right +
+          "\ntop: " +
+          this.getBounds().top +
+          "\nbot: " +
+          this.getBounds().bottom
       })
       .on("pointerup", function dragEnd(this: any) {
         this.alpha = 1
@@ -112,19 +122,30 @@ function TestGame(): JSX.Element {
             this.x +
             "\ny: " +
             this.y +
-            "\ntype: " +
-            this.type
+            "\nisSprite: " +
+            this.isSprite +
+            "\n\nGet Bounds" +
+            "\nleft: " +
+            this.getBounds().left +
+            "\nright: " +
+            this.getBounds().right +
+            "\ntop: " +
+            this.getBounds().top +
+            "\nbot: " +
+            this.getBounds().bottom
         }
       })
   }
 
-  function initSprite(sprite: SpriteVector, x: number, y: number) {
+  function initSprite(
+    sprite: SpriteVector,
+    x: number,
+    y: number
+  ): SpriteVector {
     sprite = new PIXI.Sprite(PIXI.Loader.shared.resources.square.texture)
+
     sprite.anchor.set(0.5)
-
     sprite.position.set(x, y)
-
-    sprite.type = "sprite"
 
     stage.addChild(sprite)
 
@@ -142,8 +163,17 @@ function TestGame(): JSX.Element {
           this.x +
           "\ny: " +
           this.y +
-          "\ntype: " +
-          this.type
+          "\nisSprite: " +
+          this.isSprite +
+          "\n\nGet Bounds" +
+          "\nleft: " +
+          this.getBounds().left +
+          "\nright: " +
+          this.getBounds().right +
+          "\ntop: " +
+          this.getBounds().top +
+          "\nbot: " +
+          this.getBounds().bottom
       })
       .on("pointerup", function dragEnd(this: any) {
         this.alpha = 1
@@ -164,10 +194,21 @@ function TestGame(): JSX.Element {
             this.x +
             "\ny: " +
             this.y +
-            "\ntype: " +
-            this.type
+            "\nisSprite: " +
+            this.isSprite +
+            "\n\nGet Bounds" +
+            "\nleft: " +
+            this.getBounds().left +
+            "\nright: " +
+            this.getBounds().right +
+            "\ntop: " +
+            this.getBounds().top +
+            "\nbot: " +
+            this.getBounds().bottom
         }
       })
+
+    return sprite
   }
 
   function initText() {
@@ -180,12 +221,11 @@ function TestGame(): JSX.Element {
     text = new PIXI.Text(str, style)
     stage.addChild(text)
 
-    text.position.set(250, -300)
+    text.position.set(0, 0)
   }
 
   function gameLoop(d: number) {
     collision()
-
     if (text.text !== str) text.text = str
   }
 
